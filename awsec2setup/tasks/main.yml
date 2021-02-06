@@ -1,0 +1,16 @@
+---
+# tasks file for awsec2setup
+- name: Provisioning OS in AWS cloud
+  ec2:
+    key_name: ""
+    instance_type: "t2.micro"
+    image: "ami-"
+    wait: yes
+    count: 1
+    vpc_subnet_id: "subnet-"
+    assign_public_ip: yes
+    region: "ap-south-1"
+    state: present
+    group_id: "sg-"
+    aws_access_key: "{{ acc_key_id }}"
+    aws_secret_key: "{{ sec_acc_key }}"
