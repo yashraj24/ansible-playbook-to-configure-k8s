@@ -1,0 +1,3 @@
+- hosts: managednodes
+  roles:
+  - role: "docker_on_ec2"
