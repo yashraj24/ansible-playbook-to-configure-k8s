@@ -3,42 +3,52 @@
 
 - name: Configuring Docker Repository
   yum_repository:
-    name: Docker
-    description: "Docker Repo"
-    baseurl: "https://download.docker.com/linux/centos/docker-ce.repo" 
+    name:  Docker
+    description: "docker"
+    baseurl: "https://download.docker.com/linux/centos/7/x86_64/stable/"
     gpgcheck: no
-  register: x
 
-- name: Checking Configuration Status
-  debug:
-    var: x.failed
+- name: Update all packages
+  yum:
+    name: '*'
+    state: latest
+    update_only: yes
 
-- name: Installing Docker
-  package:
-    name: "docker-ce-18.06.3.ce-3.el7.x86_64"
+- name: list of yum packages that are needed to be installed
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    packages:
+    - python-pip
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+    - amazon-linux-extras
+
+- name: Add extras repository
+  shell: yum-config-manager --enable extras
+
+  #- name: install latest version of selinux
+  #shell: yum install http://vault.centos.org/centos/7.3.1611/extras/x86_64/Packages/container-selinux-2.9-4.el7.noarch.rpm
+
+- name: Install docker-ce
+  package: 
+    name: "docker-ce-18.09.1-3.el7.x86_64"
     state: present
-  register: y
 
-- name: Checking Install Status
-  debug:
-    var: y.failed
-
-- name: Starting Docker Daemon
+- name: Enable Docker CE service at startup
   service:
     name: docker
     state: started
     enabled: yes
-  when: y.failed == false
 
-- name: Install
-  command: "pip install docker-py"    
-
-- name: Pull a Docker Image
-  docker_image: 
-     name: httpd
-     tag: latest
-     source: pull
-  register: z
-- name: Checking Pull Status
-  debug: 
-    var: z
+- name: Python pip packages that are needed to be installed
+  pip:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - boto
+    - boto3
+    - docker-compose
